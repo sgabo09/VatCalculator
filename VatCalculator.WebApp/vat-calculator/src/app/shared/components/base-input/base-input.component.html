@@ -1,0 +1,14 @@
+<mat-form-field appearance="fill">
+  <mat-label>{{ label }}</mat-label>
+  <input
+    matInput
+    [type]="type"
+    [required]="isRequired"
+    [formControl]="formControl"
+  />
+  <span *ngIf="prefix" matTextPrefix>{{ prefix }}&nbsp;</span>
+  <mat-error *ngIf="control?.invalid">
+    <span *ngIf="hasError('required')">{{ label }} is required.</span>
+    <span *ngIf="hasError('min')">{{ label }} must be ≥ 0.</span>
+  </mat-error>
+</mat-form-field>
