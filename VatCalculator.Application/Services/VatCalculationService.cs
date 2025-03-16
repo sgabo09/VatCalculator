@@ -19,37 +19,14 @@ namespace VatCalculator.Application.Services
         {
             ValidateInput(request);
 
-            decimal netAmount, grossAmount, vatAmount;
-
             if (request.NetAmount.HasValue)
-            {
-                netAmount = request.NetAmount.Value;
-                vatAmount = netAmount * (request.VatRate / 100);
-                grossAmount = netAmount + vatAmount;
-            }
-            else if (request.GrossAmount.HasValue)
-            {
-                grossAmount = request.GrossAmount.Value;
-                netAmount = grossAmount / (1 + (request.VatRate / 100));
-                vatAmount = grossAmount - netAmount;
-            }
-            else if (request.VatAmount.HasValue)
-            {
-                vatAmount = request.VatAmount.Value;
-                netAmount = vatAmount / (request.VatRate / 100);
-                grossAmount = netAmount + vatAmount;
-            }
-            else
-            {
-                throw new ArgumentException("Invalid input. Please provide one of NetAmount, GrossAmount, or VatAmount.");
-            }
+                return CalculateFromNetAmount(request.NetAmount.Value, request.VatRate);
+            if (request.GrossAmount.HasValue)
+                return CalculateFromGrossAmount(request.GrossAmount.Value, request.VatRate);
+            if (request.VatAmount.HasValue)
+                return CalculateFromVatAmount(request.VatAmount.Value, request.VatRate);
 
-            return new VatCalculationResponse
-            {
-                NetAmount = netAmount,
-                GrossAmount = grossAmount,
-                VatAmount = vatAmount
-            };
+            throw new ArgumentException("Invalid input. Please provide exactly one of NetAmount, GrossAmount, or VatAmount.");
         }
 
         public List<int> GetVatRates()
@@ -72,6 +49,27 @@ namespace VatCalculator.Application.Services
             {
                 throw new ArgumentException("Invalid input. Please provide exactly one of NetAmount, GrossAmount, or VatAmount.");
             }
+        }
+
+        private VatCalculationResponse CalculateFromNetAmount(decimal netAmount, decimal vatRate)
+        {
+            var vatAmount = netAmount * (vatRate / 100);
+            var grossAmount = netAmount + vatAmount;
+            return new VatCalculationResponse { NetAmount = netAmount, GrossAmount = grossAmount, VatAmount = vatAmount };
+        }
+
+        private VatCalculationResponse CalculateFromGrossAmount(decimal grossAmount, decimal vatRate)
+        {
+            var netAmount = grossAmount / (1 + (vatRate / 100));
+            var vatAmount = grossAmount - netAmount;
+            return new VatCalculationResponse { NetAmount = netAmount, GrossAmount = grossAmount, VatAmount = vatAmount };
+        }
+
+        private VatCalculationResponse CalculateFromVatAmount(decimal vatAmount, decimal vatRate)
+        {
+            var netAmount = vatAmount / (vatRate / 100);
+            var grossAmount = netAmount + vatAmount;
+            return new VatCalculationResponse { NetAmount = netAmount, GrossAmount = grossAmount, VatAmount = vatAmount };
         }
     }
 }
