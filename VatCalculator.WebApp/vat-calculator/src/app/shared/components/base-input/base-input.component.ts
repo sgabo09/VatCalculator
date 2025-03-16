@@ -33,6 +33,7 @@ export class BaseInputComponent {
   @Input() type: 'text' | 'number' = 'text';
   @Input() prefix: string = '';
   @Input() isRequired: boolean = false;
+  @Input() isReadonly: boolean = false;
   @Input() control!: AbstractControl | null;
 
   value: any = '';

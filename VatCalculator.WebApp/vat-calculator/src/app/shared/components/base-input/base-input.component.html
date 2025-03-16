@@ -5,6 +5,7 @@
     [type]="type"
     [required]="isRequired"
     [formControl]="formControl"
+    [readonly]="isReadonly"
   />
   <span *ngIf="prefix" matTextPrefix>{{ prefix }}&nbsp;</span>
   <mat-error *ngIf="control?.invalid">

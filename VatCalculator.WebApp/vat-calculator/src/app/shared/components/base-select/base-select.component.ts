@@ -1,11 +1,17 @@
-import { Component, forwardRef, Input } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  forwardRef,
+  Input,
+  Output,
+} from '@angular/core';
 import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR,
   ReactiveFormsModule,
 } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -32,6 +38,7 @@ export class BaseSelectComponent implements ControlValueAccessor {
   @Input() options: { value: any; label: string }[] = [];
   @Input() formControlName: string = '';
   @Input() control: any;
+  @Output() selectionChange = new EventEmitter<MatSelectChange>();
 
   value: any;
   onChange: any = () => {};
@@ -53,6 +60,7 @@ export class BaseSelectComponent implements ControlValueAccessor {
     this.value = value;
     this.onChange(value);
     this.onTouched();
+    this.selectionChange.emit(value);
   }
 
   hasError(errorName: string): boolean {

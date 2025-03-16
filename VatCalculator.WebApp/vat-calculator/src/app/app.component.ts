@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './core/components/navbar/navbar.component';
 import { VatCalculatorComponent } from './features/vat-calculator/vat-calculator.component';
+import { API_BASE_URL } from '../clients/client.generated';
 
 @Component({
   selector: 'app-root',

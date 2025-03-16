@@ -117,5 +117,15 @@ namespace VatCalculator.Tests.Services
             var exception = Assert.Throws<ArgumentException>(() => _calculationService.Calculate(request));
             Assert.Equal("Invalid input. Please provide exactly one of NetAmount, GrossAmount, or VatAmount.", exception.Message);
         }
+
+        [Fact]
+        public void GetVatRates_ReturnsConfiguredVatRates()
+        {
+            // Act
+            var rates = _calculationService.GetVatRates();
+
+            // Assert
+            Assert.Equal(new List<int> { 10, 13, 20 }, rates);
+        }
     }
 }

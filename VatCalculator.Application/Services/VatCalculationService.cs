@@ -52,6 +52,11 @@ namespace VatCalculator.Application.Services
             };
         }
 
+        public List<int> GetVatRates()
+        {
+            return _vatRatesConfig.VatRates;
+        }
+
         private void ValidateInput(VatCalculationRequest request)
         {
             if (!_vatRatesConfig.VatRates.Contains((int)request.VatRate))

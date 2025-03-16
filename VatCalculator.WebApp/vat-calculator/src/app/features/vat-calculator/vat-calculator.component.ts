@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, effect, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -13,6 +13,8 @@ import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 import { BaseInputComponent } from '../../shared/components/base-input/base-input.component';
 import { BaseSelectComponent } from '../../shared/components/base-select/base-select.component';
+import { VatCalculationService } from '../../core/services/vatcalculation.service';
+import { VatCalculationRequest } from '../../../clients/client.generated';
 
 @Component({
   selector: 'app-vat-calculator',
@@ -32,35 +34,82 @@ import { BaseSelectComponent } from '../../shared/components/base-select/base-se
   styleUrls: ['./vat-calculator.component.scss'],
 })
 export class VatCalculatorComponent implements OnInit {
-  vatForm!: FormGroup; // Form group for the VAT calculator
-  vatRateOptions = [
-    { value: '10', label: '10%' },
-    { value: '13', label: '13%' },
-    { value: '20', label: '20%' },
+  vatForm!: FormGroup;
+  amountTypes = [
+    { value: 'net', label: 'Net' },
+    { value: 'gross', label: 'Gross' },
+    { value: 'vat', label: 'VAT' },
   ];
+  isCalculated: boolean = false;
 
-  constructor(private formBuilder: FormBuilder) {}
-
-  ngOnInit(): void {
-    // Initialize the form group
-    this.vatForm = this.formBuilder.group({
-      netAmount: [null, [Validators.required, Validators.min(0)]],
-      grossAmount: [null, [Validators.required, Validators.min(0)]],
-      vatRate: [null, Validators.required],
+  constructor(
+    private formBuilder: FormBuilder,
+    private vatCalculationService: VatCalculationService
+  ) {
+    effect(() => {
+      const result = this.vatCalculationService.vatResult();
+      if (result) {
+        this.vatForm.patchValue({
+          netAmount: result.netAmount,
+          grossAmount: result.grossAmount,
+          vatAmount: result.vatAmount,
+        });
+      }
     });
   }
 
-  onCalculateClick(): void {
+  readonly vatRateOptions = computed(() =>
+    this.vatCalculationService.vatRates().map((rate) => ({
+      value: rate.toString(),
+      label: `${rate}%`,
+    }))
+  );
+
+  async ngOnInit(): Promise<void> {
+    // Initialize the form group
+    this.vatForm = this.formBuilder.group({
+      amountType: [null, Validators.required],
+      amount: [null, [Validators.required, Validators.min(0)]],
+      vatRate: [null, Validators.required],
+      netAmount: [null],
+      grossAmount: [null],
+      vatAmount: [null],
+    });
+
+    this.vatCalculationService.fetchVatRates();
+  }
+
+  async onCalculateClick(): Promise<void> {
     if (this.vatForm.invalid) {
       this.validate();
-      console.log('Form is invalid', this.vatForm);
       return;
     }
 
     const formValue = this.vatForm.value;
-    console.log('Form values:', formValue);
 
-    // Add your calculation logic here
+    const vatCalculationRequest = new VatCalculationRequest({
+      vatRate: formValue.vatRate,
+    });
+
+    switch (formValue.amountType) {
+      case 'vat':
+        vatCalculationRequest.vatAmount = formValue.amount;
+        break;
+      case 'net':
+        vatCalculationRequest.netAmount = formValue.amount;
+        break;
+      case 'gross':
+        vatCalculationRequest.grossAmount = formValue.amount;
+        break;
+    }
+
+    this.isCalculated = true;
+
+    this.vatCalculationService.calculateVat(vatCalculationRequest);
+  }
+
+  onSelectionChange(): void {
+    this.isCalculated = false;
   }
 
   // Helper method to mark all form fields as touched

@@ -1,29 +1,60 @@
 <mat-card class="container">
   <mat-card-header>
-    <mat-card-title i18n>VAT Calculator</mat-card-title>
+    <mat-card-title>VAT Calculator</mat-card-title>
   </mat-card-header>
   <mat-card-content>
     <form [formGroup]="vatForm">
+      <app-base-select
+        label="Amount Type"
+        [options]="amountTypes"
+        [control]="vatForm.get('amountType')"
+        (selectionChange)="onSelectionChange()"
+      ></app-base-select>
       <app-base-input
-        label="Net Amount"
+        label="Amount"
         type="number"
         prefix="€"
-        [control]="vatForm.get('netAmount')"
-      ></app-base-input>
-      <app-base-input
-        label="Gross Amount"
-        type="number"
-        prefix="€"
-        [control]="vatForm.get('grossAmount')"
+        [control]="vatForm.get('amount')"
       ></app-base-input>
       <app-base-select
         label="VAT Rate"
-        [options]="vatRateOptions"
+        [options]="vatRateOptions()"
         [control]="vatForm.get('vatRate')"
+        (selectionChange)="onSelectionChange()"
       ></app-base-select>
       <button mat-raised-button color="primary" (click)="onCalculateClick()">
         Calculate
       </button>
     </form>
+    <div *ngIf="isCalculated">
+      <mat-card-title>Calculated values</mat-card-title>
+      <div *ngIf="vatForm.get('amountType')?.value !== 'net'">
+        <app-base-input
+          label="Net Amount"
+          type="number"
+          prefix="€"
+          [isReadonly]="true"
+          [control]="vatForm.get('netAmount')"
+        ></app-base-input>
+      </div>
+      <div *ngIf="vatForm.get('amountType')?.value !== 'gross'">
+        <app-base-input
+          label="Gross Amount"
+          type="number"
+          prefix="€"
+          [isReadonly]="true"
+          [control]="vatForm.get('grossAmount')"
+        ></app-base-input>
+      </div>
+      <div *ngIf="vatForm.get('amountType')?.value !== 'vat'">
+        <app-base-input
+          label="Vat Amount"
+          type="number"
+          prefix="€"
+          [isReadonly]="true"
+          [control]="vatForm.get('vatAmount')"
+        ></app-base-input>
+      </div>
+    </div>
   </mat-card-content>
 </mat-card>

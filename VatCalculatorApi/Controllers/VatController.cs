@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using VatCalculator.Application.Services;
 using VatCalculator.Core.Config;
 using VatCalculator.Core.Models;
@@ -11,15 +12,16 @@ namespace VatCalculator.Api.Controllers;
 public class VatController : ControllerBase
 {
     private readonly IVatCalculationService _calculationService;
-    private readonly VatRatesConfig _vatRatesConfig;
 
-    public VatController(IVatCalculationService calculationService, VatRatesConfig vatRatesConfig)
+    public VatController(IVatCalculationService calculationService)
     {
         _calculationService = calculationService;
-        _vatRatesConfig = vatRatesConfig;
     }
 
+
     [HttpPost("calculate")]
+    [ProducesResponseType(typeof(VatCalculationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IActionResult CalculateVat([FromBody] VatCalculationRequest request)
     {
         try
@@ -34,8 +36,11 @@ public class VatController : ControllerBase
     }
 
     [HttpGet("rates")]
+    [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IActionResult GetVatRates()
     {
-        return Ok(_vatRatesConfig.VatRates);
+        var rates = _calculationService.GetVatRates();
+        return Ok(rates);
     }
 }
