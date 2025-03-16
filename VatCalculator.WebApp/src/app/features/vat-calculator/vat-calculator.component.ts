@@ -15,6 +15,7 @@ import { BaseInputComponent } from '../../shared/components/base-input/base-inpu
 import { BaseSelectComponent } from '../../shared/components/base-select/base-select.component';
 import { VatCalculationService } from '../../core/services/vatcalculation.service';
 import { VatCalculationRequest } from '../../../clients/client.generated';
+import { SelectOption } from '../../shared/models/select-option.model';
 
 @Component({
   selector: 'app-vat-calculator',
@@ -34,13 +35,21 @@ import { VatCalculationRequest } from '../../../clients/client.generated';
   styleUrls: ['./vat-calculator.component.scss'],
 })
 export class VatCalculatorComponent implements OnInit {
-  vatForm!: FormGroup;
-  amountTypes = [
+  public vatForm!: FormGroup;
+  public isCalculated: boolean = false;
+
+  public readonly amountTypes: SelectOption[] = [
     { value: 'net', label: 'Net' },
     { value: 'gross', label: 'Gross' },
     { value: 'vat', label: 'VAT' },
   ];
-  isCalculated: boolean = false;
+
+  public readonly vatRateOptions = computed(() =>
+    this.vatCalculationService.vatRates().map((rate) => ({
+      value: rate.toString(),
+      label: `${rate}%`,
+    }))
+  );
 
   constructor(
     private formBuilder: FormBuilder,
@@ -58,13 +67,6 @@ export class VatCalculatorComponent implements OnInit {
     });
   }
 
-  readonly vatRateOptions = computed(() =>
-    this.vatCalculationService.vatRates().map((rate) => ({
-      value: rate.toString(),
-      label: `${rate}%`,
-    }))
-  );
-
   async ngOnInit(): Promise<void> {
     // Initialize the form group
     this.vatForm = this.formBuilder.group({
@@ -79,37 +81,41 @@ export class VatCalculatorComponent implements OnInit {
     this.vatCalculationService.fetchVatRates();
   }
 
-  async onCalculateClick(): Promise<void> {
+  public async onCalculateClick(): Promise<void> {
     if (this.vatForm.invalid) {
       this.validate();
       return;
     }
 
     const formValue = this.vatForm.value;
+    const vatCalculationRequest = this.createVatCalculationRequest(formValue);
 
-    const vatCalculationRequest = new VatCalculationRequest({
+    this.isCalculated = true;
+    this.vatCalculationService.calculateVat(vatCalculationRequest);
+  }
+
+  public onSelectionChange(): void {
+    this.isCalculated = false;
+  }
+
+  private createVatCalculationRequest(formValue: any): VatCalculationRequest {
+    const request = new VatCalculationRequest({
       vatRate: formValue.vatRate,
     });
 
     switch (formValue.amountType) {
       case 'vat':
-        vatCalculationRequest.vatAmount = formValue.amount;
+        request.vatAmount = formValue.amount;
         break;
       case 'net':
-        vatCalculationRequest.netAmount = formValue.amount;
+        request.netAmount = formValue.amount;
         break;
       case 'gross':
-        vatCalculationRequest.grossAmount = formValue.amount;
+        request.grossAmount = formValue.amount;
         break;
     }
 
-    this.isCalculated = true;
-
-    this.vatCalculationService.calculateVat(vatCalculationRequest);
-  }
-
-  onSelectionChange(): void {
-    this.isCalculated = false;
+    return request;
   }
 
   // Helper method to mark all form fields as touched
