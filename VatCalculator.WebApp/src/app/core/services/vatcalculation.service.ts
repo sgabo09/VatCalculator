@@ -1,6 +1,5 @@
 import { Injectable, signal } from '@angular/core';
 import {
-  IVatCalculationRequest,
   VatCalculationClient,
   VatCalculationRequest,
   VatCalculationResponse,
@@ -10,14 +9,16 @@ import {
   providedIn: 'root',
 })
 export class VatCalculationService {
+  public readonly vatRates = signal<number[]>([]);
+  public readonly vatResult = signal<VatCalculationResponse | null>(null);
+  public readonly error = signal<string | null>(null);
+  public readonly isLoading = signal<boolean>(false);
+
   constructor(private readonly client: VatCalculationClient) {}
 
-  readonly vatRates = signal<number[]>([]);
-  readonly vatResult = signal<VatCalculationResponse | null>(null);
-  readonly error = signal<string | null>(null);
-
-  async calculateVat(request: VatCalculationRequest): Promise<void> {
+  public async calculateVat(request: VatCalculationRequest): Promise<void> {
     try {
+      this.isLoading.set(true);
       const response = await this.client.calculate(request).toPromise();
       if (response) {
         this.vatResult.set(response);
@@ -27,19 +28,24 @@ export class VatCalculationService {
       }
     } catch (err) {
       this.error.set('Failed to calculate VAT');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
-  async fetchVatRates(): Promise<void> {
+  public async fetchVatRates(): Promise<void> {
     try {
+      this.isLoading.set(true);
       const rates = await this.client.rates().toPromise();
       if (rates) {
         this.vatRates.set(rates);
       } else {
-        console.error('Received undefined VAT rates');
+        this.error.set('Received undefined VAT rates');
       }
     } catch (error) {
-      console.error('Failed to fetch VAT rates:', error);
+      this.error.set(`Failed to fetch VAT rates:' ${error}`);
+    } finally {
+      this.isLoading.set(false);
     }
   }
 }

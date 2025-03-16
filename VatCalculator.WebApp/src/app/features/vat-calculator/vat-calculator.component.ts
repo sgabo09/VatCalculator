@@ -1,4 +1,4 @@
-import { Component, computed, effect, OnInit } from '@angular/core';
+import { Component, computed, effect, OnInit, Signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -16,6 +16,7 @@ import { BaseSelectComponent } from '../../shared/components/base-select/base-se
 import { VatCalculationService } from '../../core/services/vatcalculation.service';
 import { VatCalculationRequest } from '../../../clients/client.generated';
 import { SelectOption } from '../../shared/models/select-option.model';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-vat-calculator',
@@ -27,6 +28,7 @@ import { SelectOption } from '../../shared/models/select-option.model';
     MatSelectModule,
     MatButtonModule,
     MatCardModule,
+    MatProgressSpinnerModule,
     ReactiveFormsModule,
     BaseInputComponent,
     BaseSelectComponent,
@@ -37,6 +39,7 @@ import { SelectOption } from '../../shared/models/select-option.model';
 export class VatCalculatorComponent implements OnInit {
   public vatForm!: FormGroup;
   public isCalculated: boolean = false;
+  public isLoading: Signal<boolean>;
 
   public readonly amountTypes: SelectOption[] = [
     { value: 'net', label: 'Net' },
@@ -55,6 +58,8 @@ export class VatCalculatorComponent implements OnInit {
     private formBuilder: FormBuilder,
     private vatCalculationService: VatCalculationService
   ) {
+    this.isLoading = this.vatCalculationService.isLoading;
+
     effect(() => {
       const result = this.vatCalculationService.vatResult();
       if (result) {
@@ -78,7 +83,7 @@ export class VatCalculatorComponent implements OnInit {
       vatAmount: [null],
     });
 
-    this.vatCalculationService.fetchVatRates();
+    await this.vatCalculationService.fetchVatRates();
   }
 
   public async onCalculateClick(): Promise<void> {
@@ -91,7 +96,7 @@ export class VatCalculatorComponent implements OnInit {
     const vatCalculationRequest = this.createVatCalculationRequest(formValue);
 
     this.isCalculated = true;
-    this.vatCalculationService.calculateVat(vatCalculationRequest);
+    await this.vatCalculationService.calculateVat(vatCalculationRequest);
   }
 
   public onSelectionChange(): void {

@@ -22,12 +22,24 @@
         [control]="vatForm.get('vatRate')"
         (selectionChange)="onSelectionChange()"
       ></app-base-select>
-      <button mat-raised-button color="primary" (click)="onCalculateClick()">
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="onCalculateClick()"
+        [disabled]="isLoading()"
+      >
         Calculate
       </button>
     </form>
+
+    <div *ngIf="isLoading()" class="spinner-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
     <div *ngIf="isCalculated">
       <mat-card-title>Calculated values</mat-card-title>
+
       <div *ngIf="vatForm.get('amountType')?.value !== 'net'">
         <app-base-input
           label="Net Amount"
@@ -37,6 +49,7 @@
           [control]="vatForm.get('netAmount')"
         ></app-base-input>
       </div>
+
       <div *ngIf="vatForm.get('amountType')?.value !== 'gross'">
         <app-base-input
           label="Gross Amount"
@@ -46,6 +59,7 @@
           [control]="vatForm.get('grossAmount')"
         ></app-base-input>
       </div>
+
       <div *ngIf="vatForm.get('amountType')?.value !== 'vat'">
         <app-base-input
           label="Vat Amount"
