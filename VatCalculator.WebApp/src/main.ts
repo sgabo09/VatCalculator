@@ -11,6 +11,6 @@ bootstrapApplication(AppComponent, {
     provideAnimationsAsync(),
     provideHttpClient(),
     VatCalculationClient,
-    { provide: API_BASE_URL, useValue: 'http://localhost:5174' },
+    { provide: API_BASE_URL, useValue: 'https://localhost:7082' },
   ],
 }).catch((err) => console.error(err));
