@@ -23,14 +23,14 @@
         (selectionChange)="onSelectionChange()"
       ></app-base-select>
 
-      <button
-        mat-raised-button
+      <app-base-button
+        label="Calculate"
         color="primary"
         (click)="onCalculateClick()"
         [disabled]="isLoading()"
       >
         Calculate
-      </button>
+      </app-base-button>
     </form>
 
     <div *ngIf="isLoading()" class="spinner-container">

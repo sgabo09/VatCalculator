@@ -5,10 +5,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 import { BaseInputComponent } from '../../shared/components/base-input/base-input.component';
@@ -17,6 +14,7 @@ import { VatCalculationService } from '../../core/services/vatcalculation.servic
 import { VatCalculationRequest } from '../../../clients/client.generated';
 import { SelectOption } from '../../shared/models/select-option.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { BaseButtonComponent } from '../../shared/components/base-button/base-button.component';
 
 @Component({
   selector: 'app-vat-calculator',
@@ -24,14 +22,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   imports: [
     CommonModule,
     MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule,
     ReactiveFormsModule,
     BaseInputComponent,
     BaseSelectComponent,
+    BaseButtonComponent,
   ],
   templateUrl: './vat-calculator.component.html',
   styleUrls: ['./vat-calculator.component.scss'],
